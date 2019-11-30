@@ -1,1 +1,32 @@
-{"space-dev": {"path": "E:/rpm-dev/Coding/space-dev", "run": {"vscode": ["code ."], "TMUX": ["tmux"]}, "scripts": {"git": ["git add .", "git commit -m \"auto commit\"", "git push -u origin master"]}, "start": {"vscode": ["<<ctrl+shift+'>>echo hi", "<<ctrl+shift+'>>echo hello"], "TMUX": ["<<ctrl+b>>", "<<ctrl+shift+'>>", "<<ctrl+b>>", "<<ctrl+shift+%>>"]}}}
+{
+    "space-dev": {
+        "path": "E:/rpm-dev/Coding/space-dev",
+        "run": {
+            "vscode": [
+                "code ."
+            ],
+            "TMUX": [
+                "tmux"
+            ]
+        },
+        "scripts": {
+            "git": [
+                "git add .",
+                "git commit -m \"auto commit\"",
+                "git push -u origin master"
+            ]
+        },
+        "start": {
+            "vscode": [
+                "<<ctrl+shift+'>>echo hi",
+                "<<ctrl+shift+'>>echo hello"
+            ],
+            "TMUX": [
+                "<<ctrl+b>>",
+                "<<ctrl+shift+'>>",
+                "<<ctrl+b>>",
+                "<<ctrl+shift+%>>"
+            ]
+        }
+    }
+}
