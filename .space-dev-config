@@ -1,7 +1,7 @@
 {
 	"run": ["tmux"],
 	"scripts": {
-		"git": ["git add .", "git commit -m \"auto commit\"", "git push"]
+		"git": ["git add .", "git commit -m \"auto commit\"", "git push -u origin master"]
 	},
 	"start": {
 		"vscode": ["<<ctrl+shift+'>>echo hi", "<<ctrl+shift+'>>echo hello"],
