@@ -6,11 +6,11 @@ import json
 import argparse
 import time
 from pathlib import Path
+import re
 
 
 def get_root_dir():
     return sys.path[0]
-
 
 def get_client_base_dir():
     global_config = load_global_config_file()
@@ -32,14 +32,14 @@ def get_client_base_folder_name():
 
 
 def load_global_config_file():
-    path = get_root_dir() + "\\global_config.json"
+    path = get_root_dir() + "/global_config.json"
     with open(path, "r+") as f:
         config = json.load(f)
         return config
 
 
 def save_to_global_config_file(new_config):
-    path = get_root_dir() + "\\global_config.json"
+    path = get_root_dir() + "/global_config.json"
 
     config = load_global_config_file()
     with open(path, "w+") as f:
@@ -48,7 +48,7 @@ def save_to_global_config_file(new_config):
 
 
 def save_global_config_file(new_config):
-    path = get_root_dir() + "\\global_config.json"
+    path = get_root_dir() + "/global_config.json"
 
     with open(path, "w+") as f:
         json.dump(new_config, f)
@@ -61,9 +61,12 @@ def load_client_config_file():
         with open(path, "r") as f:
             config = json.load(f)
             return config
+    except json.JSONDecodeError as err:
+        print(f"[space-dev] Unable to parse .space-dev-config.")
+        print(err)
     except:
         print(f"[space-dev] Unable to load {path} file on current directory.")
-        sys.exit()
+    sys.exit()
 
 
 def add_space():
@@ -113,10 +116,27 @@ def list_spaces():
     for i, space in enumerate(global_config.keys()):
         print(str(i) + ". " + space)
 
+def parse_commands(command):
+    cmd = command
+    p = re.compile('<<(.+)>>')
+    sequence = p.findall(command)
+
+    if len(sequence):
+        sequence = sequence[0]
+        cmd = cmd.replace('<<'+sequence+'>>', '')
+        sequence = sequence.split('+')
+        return cmd, sequence
+
+    else:
+        return cmd, None
+
 def start_space():
     space_config = load_client_config_file()
 
+    # check if is an integrated terminal
     program = os.getenv("TERM_PROGRAM")
+    if not program and os.getenv("TMUX"):
+        program = "TMUX"
 
     if "start" not in space_config.keys():
         print("[space-dev] There are no start scripts for this space.")
@@ -125,16 +145,15 @@ def start_space():
     if program in space_config["start"].keys():
         commands = space_config["start"][program]
 
-        # check if is an integrated terminal
-        if program == "vscode":
-            for cmd in commands:
-                pyautogui.keyDown('ctrl')
-                pyautogui.keyDown('shift')
-                pyautogui.keyDown('`')
-                pyautogui.keyUp('ctrl')
-                pyautogui.keyUp('shift')
-                pyautogui.keyUp('`')
+        for cmd in commands:
+            cmd, keys = parse_commands(cmd)
 
+            for key in keys:
+                pyautogui.keyDown(key)
+            for key in reversed(keys):
+                pyautogui.keyUp(key)
+
+            if cmd:
                 time.sleep(1.5)
 
                 pyautogui.press("enter")
@@ -143,7 +162,7 @@ def start_space():
     else:
         print(f"[space-dev] There is no start script linked to {program} for this space.")
 
-def exec_space(space_name, run=None, load=False):
+def exec_space(space_name, run=None, load=False, load_script=0):
     global_config = load_global_config_file()
 
     try:
@@ -185,7 +204,11 @@ def exec_space(space_name, run=None, load=False):
 
     # exec run commands
     elif load:
-        commands = space_config["run"]
+        if load_script:
+            commands = space_config["run"][load_script]
+        else:
+            first_key = list(space_config["run"].keys())[0] 
+            commands = space_config["run"][first_key]
 
     for cmd in commands:
         os.system(cmd)
@@ -201,6 +224,10 @@ def get_space_name_from_number(number):
 def get_script_name_from_number(number):
     client_config = load_client_config_file()
     return list(client_config["scripts"].keys())[number]
+
+def get_load_script_name_from_number(number):
+    client_config = load_client_config_file()
+    return list(client_config["run"].keys())[number]
 
 def remove_space(space):
     global_config = load_global_config_file()
@@ -226,7 +253,7 @@ def list_scripts():
     if "scripts" in space_config.keys():
         scripts = space_config["scripts"]
     else:
-        print("There are no scripts for this space.")
+        print("[space-dev] There are no scripts for this space.")
         return False
 
     for i, script in enumerate(scripts.keys()):
@@ -241,9 +268,25 @@ def list_start_scripts():
         for i, script in enumerate(scripts):
             print(str(i) + ". " + script)
     else:
-        print("There are no start scripts for this space.")
+        print("[space-dev] There are no start scripts for this space.")
         sys.exit()
 
+def list_load_scripts(space_name):
+    global_config = load_global_config_file()
+    space_config = None
+    try:
+        space_config = global_config[space_name]
+    except:
+        print("[space-dev] The space name was not found.")
+        sys.exit()
+
+    if "run" in space_config.keys():
+        scripts = space_config["run"]
+        for i, script in enumerate(scripts):
+            print(str(i) + ". " + script)
+    else:
+        print("[space-dev] There are no load scripts for this space.")
+        sys.exit()
 
 
 
@@ -259,7 +302,9 @@ if __name__ == "__main__":
                            help="Add (or updates) a space. Can be used from any space subdirectory.")
 
     loadparser = subparsers.add_parser("load")
-    loadparser.add_argument('load', nargs=1, help="Load space")
+    loadparser.add_argument('load', nargs='*', help="Load space")
+    loadparser.add_argument('--ls', action="store_true",
+                           help="List space's load  scripts")
 
     startparser = subparsers.add_parser("start")
     startparser.add_argument('start', action="store_true", help="Start space's application specific scripts")
@@ -301,17 +346,35 @@ if __name__ == "__main__":
 
 
     if args.command == "load":
-        space_name = args.load[0]
+        if args.load:
+            space_name = args.load[0]
+            load_script = None
+            if len(args.load) == 2:
+                load_script = args.load[1]
+                try:
+                    load_script = int(load_script)
+                    load_script = get_load_script_name_from_number(load_script)
+                except:
+                    pass
 
-        # check if the space number was provided
-        try:
-            space_number = int(space_name)
-            space_name = get_space_name_from_number(space_number)
-        except:
-            pass
 
-        exec_space(space_name, load=True)
-        print("[space-dev] Executing space " + str(space_name))
+            # check if the space number was provided
+            try:
+                space_number = int(space_name)
+                space_name = get_space_name_from_number(space_number)
+            except:
+                pass
+
+            if args.ls:
+                list_load_scripts(space_name)
+                sys.exit()
+
+            exec_space(space_name, load=True, load_script=load_script)
+            
+            print("[space-dev] Executing space " + str(space_name))
+        else:
+            print("[space-dev] Please specify a space name or number to load.")
+
         sys.exit()
 
     if args.command == "add":

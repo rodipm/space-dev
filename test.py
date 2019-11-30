@@ -1,24 +1,16 @@
-import argparse
+import re
 
-parser = argparse.ArgumentParser(description='Saves and auto opens your development space')
+def parse_commands(command):
+    cmd = command
+    p = re.compile('<<(.+)>>')
+    sequence = p.findall(command)
 
-subparsers = parser.add_subparsers(dest="command")
-subparsers.required = False
+    if len(sequence):
+        sequence = sequence[0]
+        cmd = cmd.replace('<<'+sequence+'>>', '')
+        sequence = sequence.split('+')
+        return cmd, sequence
 
-loadparser = subparsers.add_parser("load")
-loadparser.add_argument('load', nargs=1, help="Load space", default=None)
-
-lsparser = subparsers.add_parser("ls")
-lsparser.add_argument('ls', action="store_true",
-                      help="List spaces", default=None)
-
-rmparser = subparsers.add_parser("rm")
-rmparser.add_argument('rm', nargs=1, help="Remove space", default=None)
-
-runparser = subparsers.add_parser("run")
-runparser.add_argument('run', action="store_true",
-                       help="Run aditional scripts.", default=None)
-
-args = parser.parse_args()
-
-print(args)
+    else:
+        return cmd, None
+print(parse_commands("eiuhaseshaieuh ieu hsaie uhsaiue haiueh isa a+b+c+d+asdas>>"))
