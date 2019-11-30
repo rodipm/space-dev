@@ -177,7 +177,6 @@ def parse_load_script_name(number):
 #####################################################################
 #####################################################################
 
-
 def add_space():
     global_config = load_global_config_file()
     config = load_client_config_file()

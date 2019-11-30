@@ -8,3 +8,86 @@ Simply copy and paste these lines to your terminal (requires git installed)
 git clone https://github.com/rodipm/space-dev.git
 cd space-dev && ./install.py
 ```
+## Usage ##
+
+```
+usage: space_dev [-h] {add,load,start,run,ls,rm} ...
+
+Saves and auto opens your development space
+
+positional arguments:
+  {add,load,start,run,ls,rm}
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+
+### 1. Add ###
+```
+usage: space_dev add [-h]
+
+positional arguments:
+  add         Add (or updates) a space. Can be used from any space
+              subdirectory.
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+### 2. Load ###
+```
+usage: space_dev load [-h] [--ls] [load [load ...]]
+
+positional arguments:
+  load        Load space
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --ls        List space's load scripts
+```
+
+### 3. Start ###
+```
+usage: space_dev start [-h] [--ls]
+
+positional arguments:
+  start       Start space's application specific scripts
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --ls        List space's application specific scripts to start
+```
+
+### 4. Run ###
+```
+usage: space_dev run [-h] [--ls] [run]
+
+positional arguments:
+  run         Run aditional scripts.
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --ls        List scripts to run
+```
+
+### 5. Rm ###
+```
+usage: space_dev rm [-h] rm
+
+positional arguments:
+  rm          Remove space
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+### 6. ls ###
+```
+usage: space_dev ls [-h]
+
+positional arguments:
+  ls          List spaces
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
