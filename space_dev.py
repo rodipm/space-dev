@@ -14,8 +14,10 @@ import re
 #####################################################################
 #####################################################################
 
+
 def get_root_dir():
     return sys.path[0]
+
 
 def get_client_base_dir():
     global_config = load_global_config_file()
@@ -31,8 +33,10 @@ def get_client_base_dir():
         current_path = parent
     return current_path.as_posix()
 
+
 def get_client_base_folder_name():
     return os.path.basename(get_client_base_dir())
+
 
 def load_global_config_file():
     path = get_root_dir() + "/global_config.json"
@@ -40,17 +44,19 @@ def load_global_config_file():
         config = json.load(f)
         return config
 
+
 def save_global_config_file(new_config, update=False):
     path = get_root_dir() + "/global_config.json"
 
+    config = load_global_config_file()
     with open(path, "w+") as f:
         if update:
-            config = load_global_config_file()
             config[new_config.pop("name")] = new_config
             json.dump(config, f)
         else:
             with open(path, "w+") as f:
                 json.dump(new_config, f)
+
 
 def load_client_config_file():
     path = Path(get_client_base_dir(), ".space-dev-config.json")
@@ -72,6 +78,7 @@ def load_client_config_file():
 #####################################################################
 #####################################################################
 
+
 def list_spaces(show=True):
     global_config = load_global_config_file()
     spaces = global_config.keys()
@@ -80,6 +87,7 @@ def list_spaces(show=True):
         for i, space in enumerate(spaces):
             print(str(i) + ". " + space)
     return spaces
+
 
 def list_scripts():
     space_config = load_client_config_file()
@@ -106,6 +114,7 @@ def list_start_scripts():
     else:
         print("[space-dev] There are no start scripts for this space.")
         sys.exit()
+
 
 def list_load_scripts(space_name):
     global_config = load_global_config_file()
@@ -139,7 +148,9 @@ def parse_space_name(number):
         number = int(number)
         return list(global_config.keys())[number]
     except:
+        return number
         pass
+
 
 def parse_script_name(number):
     client_config = load_client_config_file()
@@ -147,7 +158,9 @@ def parse_script_name(number):
         number = int(number)
         return list(client_config["scripts"].keys())[number]
     except:
+        return number
         pass
+
 
 def parse_load_script_name(number):
     client_config = load_client_config_file()
@@ -155,6 +168,7 @@ def parse_load_script_name(number):
         number = int(number)
         return list(client_config["load"].keys())[number]
     except:
+        return number
         pass
 
 #####################################################################
@@ -162,6 +176,7 @@ def parse_load_script_name(number):
 #####                      SPACE MNGMNT                         #####
 #####################################################################
 #####################################################################
+
 
 def add_space():
     global_config = load_global_config_file()
@@ -203,6 +218,7 @@ def add_space():
 
     return is_new_space
 
+
 def load_space(space_name, load_script=0):
     global_config = load_global_config_file()
 
@@ -232,6 +248,7 @@ def load_space(space_name, load_script=0):
         os.system(cmd)
 
     return True
+
 
 def start_space():
     space_config = load_client_config_file()
@@ -267,7 +284,7 @@ def start_space():
             f"[space-dev] There is no start script linked to {program} for this space.")
 
 
-def run_script(space_name, run=None, load=False, load_script=0):
+def run_script(space_name, run=None):
     global_config = load_global_config_file()
 
     try:
@@ -290,8 +307,7 @@ def run_script(space_name, run=None, load=False, load_script=0):
 
         # check if a script number was provided
 
-        run = parse_script_name(script_number)
-
+        run = parse_script_name(run)
 
         if run in scripts.keys():
             commands = space_config["scripts"][run]
@@ -309,6 +325,7 @@ def run_script(space_name, run=None, load=False, load_script=0):
 
     return True
 
+
 def remove_space(space):
     global_config = load_global_config_file()
 
@@ -324,6 +341,7 @@ def remove_space(space):
         print(f"[space-dev] The space {space} was removed.")
     else:
         print("[space-dev] The space could not be removed because it does not exit.")
+
 
 def parse_commands(command):
     cmd = command
@@ -345,6 +363,7 @@ def parse_commands(command):
 #####################################################################
 #####################################################################
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Saves and auto opens your development space')
@@ -359,12 +378,13 @@ if __name__ == "__main__":
     loadparser = subparsers.add_parser("load")
     loadparser.add_argument('load', nargs='*', help="Load space")
     loadparser.add_argument('--ls', action="store_true",
-                           help="List space's load  scripts")
+                            help="List space's load  scripts")
 
     startparser = subparsers.add_parser("start")
-    startparser.add_argument('start', action="store_true", help="Start space's application specific scripts")
+    startparser.add_argument('start', action="store_true",
+                             help="Start space's application specific scripts")
     startparser.add_argument('--ls', action="store_true",
-                           help="List space's application specific scripts to start")
+                             help="List space's application specific scripts to start")
 
     runparser = subparsers.add_parser("run")
     runparser.add_argument('run', nargs="?", help="Run aditional scripts.")
@@ -425,7 +445,6 @@ if __name__ == "__main__":
             else:
                 print("[space-dev] Please specify a space name or number to load.")
 
-
     #####################################################################
     #####                       START SPACE                         #####
     #####################################################################
@@ -461,5 +480,5 @@ if __name__ == "__main__":
     #####################################################################
     elif args.command == None:
         parser.print_help()
-    
+
     sys.exit()

@@ -17,8 +17,8 @@
     },
     "start": {
         "vscode": [
-            "<<ctrl+shift+'>>echo hi",
-            "<<ctrl+shift+'>>echo hello"
+            "<<ctrl+shift+`>>echo hi",
+            "<<ctrl+shift+`>>echo hello"
         ],
         "TMUX": [
             "<<ctrl+b>>",
