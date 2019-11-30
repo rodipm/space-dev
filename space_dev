@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import pyautogui
 import os
 import sys
@@ -6,11 +6,11 @@ import json
 import argparse
 import time
 from pathlib import Path
+import re
 
 
 def get_root_dir():
     return sys.path[0]
-
 
 def get_client_base_dir():
     global_config = load_global_config_file()
@@ -32,14 +32,14 @@ def get_client_base_folder_name():
 
 
 def load_global_config_file():
-    path = get_root_dir() + "\\global_config.json"
+    path = get_root_dir() + "/global_config.json"
     with open(path, "r+") as f:
         config = json.load(f)
         return config
 
 
 def save_to_global_config_file(new_config):
-    path = get_root_dir() + "\\global_config.json"
+    path = get_root_dir() + "/global_config.json"
 
     config = load_global_config_file()
     with open(path, "w+") as f:
@@ -48,7 +48,7 @@ def save_to_global_config_file(new_config):
 
 
 def save_global_config_file(new_config):
-    path = get_root_dir() + "\\global_config.json"
+    path = get_root_dir() + "/global_config.json"
 
     with open(path, "w+") as f:
         json.dump(new_config, f)
@@ -113,10 +113,27 @@ def list_spaces():
     for i, space in enumerate(global_config.keys()):
         print(str(i) + ". " + space)
 
+def parse_commands(command):
+    cmd = command
+    p = re.compile('<<(.+)>>')
+    sequence = p.findall(command)
+
+    if len(sequence):
+        sequence = sequence[0]
+        cmd = cmd.replace('<<'+sequence+'>>', '')
+        sequence = sequence.split('+')
+        return cmd, sequence
+
+    else:
+        return cmd, None
+
 def start_space():
     space_config = load_client_config_file()
 
+    # check if is an integrated terminal
     program = os.getenv("TERM_PROGRAM")
+    if not program and os.getenv("TMUX"):
+        program = "TMUX"
 
     if "start" not in space_config.keys():
         print("[space-dev] There are no start scripts for this space.")
@@ -125,16 +142,15 @@ def start_space():
     if program in space_config["start"].keys():
         commands = space_config["start"][program]
 
-        # check if is an integrated terminal
-        if program == "vscode":
-            for cmd in commands:
-                pyautogui.keyDown('ctrl')
-                pyautogui.keyDown('shift')
-                pyautogui.keyDown('`')
-                pyautogui.keyUp('ctrl')
-                pyautogui.keyUp('shift')
-                pyautogui.keyUp('`')
+        for cmd in commands:
+            cmd, keys = parse_commands(cmd)
 
+            for key in keys:
+                pyautogui.keyDown(key)
+            for key in reversed(keys):
+                pyautogui.keyUp(key)
+
+            if cmd:
                 time.sleep(1.5)
 
                 pyautogui.press("enter")
