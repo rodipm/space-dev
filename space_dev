@@ -40,30 +40,27 @@ def load_global_config_file():
         config = json.load(f)
         return config
 
-def save_to_global_config_file(new_config):
-    path = get_root_dir() + "/global_config.json"
-
-    config = load_global_config_file()
-    with open(path, "w+") as f:
-        config[new_config.pop("name")] = new_config
-        json.dump(config, f)
-
-
-def save_global_config_file(new_config):
+def save_global_config_file(new_config, update=False):
     path = get_root_dir() + "/global_config.json"
 
     with open(path, "w+") as f:
-        json.dump(new_config, f)
+        if update:
+            config = load_global_config_file()
+            config[new_config.pop("name")] = new_config
+            json.dump(config, f)
+        else:
+            with open(path, "w+") as f:
+                json.dump(new_config, f)
 
 def load_client_config_file():
-    path = Path(get_client_base_dir(), ".space-dev-config")
+    path = Path(get_client_base_dir(), ".space-dev-config.json")
 
     try:
         with open(path, "r") as f:
             config = json.load(f)
             return config
     except json.JSONDecodeError as err:
-        print(f"[space-dev] Unable to parse .space-dev-config.")
+        print(f"[space-dev] Unable to parse .space-dev-config.json.")
         print(err)
     except:
         print(f"[space-dev] Unable to load {path} file on current directory.")
@@ -135,18 +132,30 @@ def list_load_scripts(space_name):
 #####################################################################
 #####################################################################
 
-def get_space_name_from_number(number):
+
+def parse_space_name(number):
     global_config = load_global_config_file()
-    return list(global_config.keys())[number]
+    try:
+        number = int(number)
+        return list(global_config.keys())[number]
+    except:
+        pass
 
-
-def get_script_name_from_number(number):
+def parse_script_name(number):
     client_config = load_client_config_file()
-    return list(client_config["scripts"].keys())[number]
+    try:
+        number = int(number)
+        return list(client_config["scripts"].keys())[number]
+    except:
+        pass
 
-def get_load_script_name_from_number(number):
+def parse_load_script_name(number):
     client_config = load_client_config_file()
-    return list(client_config["load"].keys())[number]
+    try:
+        number = int(number)
+        return list(client_config["load"].keys())[number]
+    except:
+        pass
 
 #####################################################################
 #####################################################################
@@ -190,9 +199,39 @@ def add_space():
     for key in config.keys():
         generated_gobal_config[key] = config[key]
 
-    save_to_global_config_file(generated_gobal_config)
+    save_global_config_file(generated_gobal_config, update=True)
 
     return is_new_space
+
+def load_space(space_name, load_script=0):
+    global_config = load_global_config_file()
+
+    try:
+        space_config = global_config[space_name]
+    except:
+        print("[space-dev] The space name was not found")
+        list_spaces()
+        sys.exit()
+
+    # get path
+    path = space_config["path"]
+
+    # cd to path
+    os.chdir(path)
+
+    commands = None
+
+    # exec run commands
+    if load_script:
+        commands = space_config["load"][load_script]
+    else:
+        first_key = list(space_config["load"].keys())[0]
+        commands = space_config["load"][first_key]
+
+    for cmd in commands:
+        os.system(cmd)
+
+    return True
 
 def start_space():
     space_config = load_client_config_file()
@@ -227,35 +266,6 @@ def start_space():
         print(
             f"[space-dev] There is no start script linked to {program} for this space.")
 
-def load_space(space_name, load_script=0):
-    global_config = load_global_config_file()
-
-    try:
-        space_config = global_config[space_name]
-    except:
-        print("[space-dev] The space name was not found")
-        list_spaces()
-        sys.exit()
-
-    # get path
-    path = space_config["path"]
-
-    # cd to path
-    os.chdir(path)
-
-    commands = None
-
-    # exec run commands
-    if load_script:
-        commands = space_config["load"][load_script]
-    else:
-        first_key = list(space_config["load"].keys())[0]
-        commands = space_config["load"][first_key]
-
-    for cmd in commands:
-        os.system(cmd)
-
-    return True
 
 def run_script(space_name, run=None, load=False, load_script=0):
     global_config = load_global_config_file()
@@ -279,11 +289,9 @@ def run_script(space_name, run=None, load=False, load_script=0):
         scripts = space_config["scripts"]
 
         # check if a script number was provided
-        try:
-            script_number = int(run)
-            run = get_script_name_from_number(script_number)
-        except:
-            pass
+
+        run = parse_script_name(script_number)
+
 
         if run in scripts.keys():
             commands = space_config["scripts"][run]
@@ -293,7 +301,7 @@ def run_script(space_name, run=None, load=False, load_script=0):
             sys.exit()
     else:
         print(
-            f"[space-dev] Unable to find 'scripts' section on '.space-dev-config' file.")
+            f"[space-dev] Unable to find 'scripts' section on '.space-dev-config.json' file.")
         sys.exit()
 
     for cmd in commands:
@@ -306,7 +314,7 @@ def remove_space(space):
 
     try:
         space_number = int(space)
-        space = get_space_name_from_number(space_number)
+        space = parse_space_name(space_number)
     except:
         pass
 
@@ -393,14 +401,14 @@ if __name__ == "__main__":
                 load_script = args.load[1]
                 try:
                     load_script = int(load_script)
-                    load_script = get_load_script_name_from_number(load_script)
+                    load_script = parse_load_script_name(load_script)
                 except:
                     pass
 
             # check if the space number was provided
             try:
                 space_number = int(space_name)
-                space_name = get_space_name_from_number(space_number)
+                space_name = parse_space_name(space_number)
             except:
                 pass
 
