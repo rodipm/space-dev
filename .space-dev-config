@@ -1,5 +1,5 @@
 {
-	"run": {
+	"load": {
 		"vscode": ["code ."],
 		"TMUX": ["tmux"]
 	},
