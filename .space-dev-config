@@ -4,7 +4,7 @@
 		"TMUX": ["tmux"]
 	},
 	"scripts": {
-		"git": ["rm space_dev && cp space_dev.py space_dev", "git add .", "git commit -m \"auto commit\"", "git push -u origin master"]
+		"git": ["rm space_dev && cp space_dev.py space_dev1", "git add .", "git commit -m \"auto commit\"", "git push -u origin master"]
 	},
 	"start": {
 		"vscode": ["<<ctrl+shift+'>>echo hi", "<<ctrl+shift+'>>echo hello"],
