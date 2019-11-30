@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import pyautogui
 import os
 import sys
@@ -110,11 +110,14 @@ def add_space():
     return is_new_space
 
 
-def list_spaces():
+def list_spaces(show=True):
     global_config = load_global_config_file()
-
-    for i, space in enumerate(global_config.keys()):
-        print(str(i) + ". " + space)
+    spaces = global_config.keys()
+    if show:
+        print("[space-dev] Spaces available:")
+        for i, space in enumerate(spaces):
+            print(str(i) + ". " + space)
+    return spaces
 
 def parse_commands(command):
     cmd = command
@@ -247,8 +250,7 @@ def remove_space(space):
 
 
 def list_scripts():
-    global_config = load_global_config_file()
-    space_config = global_config[get_client_base_folder_name()]
+    space_config = load_client_config_file()
 
     if "scripts" in space_config.keys():
         scripts = space_config["scripts"]
@@ -256,6 +258,7 @@ def list_scripts():
         print("[space-dev] There are no scripts for this space.")
         return False
 
+    print("[space-dev] Scripts for this space:")
     for i, script in enumerate(scripts.keys()):
         print(str(i) + ". " + script)
 
@@ -265,6 +268,7 @@ def list_start_scripts():
 
     if "start" in space_config.keys():
         scripts = space_config["start"]
+        print("[space-dev] Start scripts for this space:")
         for i, script in enumerate(scripts):
             print(str(i) + ". " + script)
     else:
@@ -282,6 +286,8 @@ def list_load_scripts(space_name):
 
     if "run" in space_config.keys():
         scripts = space_config["run"]
+
+        print("[space-dev] Load scripts for this space:")
         for i, script in enumerate(scripts):
             print(str(i) + ". " + script)
     else:
@@ -321,7 +327,6 @@ if __name__ == "__main__":
 
     rmparser = subparsers.add_parser("rm")
     rmparser.add_argument('rm', nargs=1, help="Remove space")
-
 
     args = parser.parse_args()
 
@@ -373,7 +378,10 @@ if __name__ == "__main__":
             
             print("[space-dev] Executing space " + str(space_name))
         else:
-            print("[space-dev] Please specify a space name or number to load.")
+            if args.ls:
+                list_spaces()
+            else:
+                print("[space-dev] Please specify a space name or number to load.")
 
         sys.exit()
 
