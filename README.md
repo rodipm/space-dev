@@ -8,7 +8,8 @@ Simply copy and paste these lines to your terminal (requires git installed)
 git clone https://github.com/rodipm/space-dev.git
 cd space-dev && ./install.py
 ```
-The 'install.py' file will add the project dir to system PATH and auto install package dependencies
+The 'install.py' file will add the project dir to system PATH and auto install package dependencies.
+
 ### Config ###
 
 You must create a file named '.space-dev-config.json' in your desired root space folder.
@@ -49,6 +50,14 @@ A sample config file can be
 ```
 
 ## Usage ##
+
+If 'install.py' was correctly executed and, therefore, the project dir has been added to system`s PATH, one can run space-dev using
+
+> space_dev [-h] {add,load,start,run,ls,rm} ...
+
+
+no file extension nor path to file required.
+
 ```
 usage: space_dev [-h] {add,load,start,run,ls,rm} ...
 
