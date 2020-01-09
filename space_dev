@@ -267,10 +267,11 @@ def start_space():
         for cmd in commands:
             cmd, keys = parse_commands(cmd)
 
-            for key in keys:
-                pyautogui.keyDown(key)
-            for key in reversed(keys):
-                pyautogui.keyUp(key)
+            if keys:
+                for key in keys:
+                    pyautogui.keyDown(key)
+                for key in reversed(keys):
+                    pyautogui.keyUp(key)
 
             if cmd:
                 time.sleep(1.5)
@@ -299,17 +300,27 @@ def run_script(space_name, run=None):
     # cd to path
     os.chdir(path)
 
-    commands = None
-
     if "scripts" in space_config.keys():
         scripts = space_config["scripts"]
 
         # check if a script number was provided
-
         run = parse_script_name(run)
 
         if run in scripts.keys():
-            commands = space_config["scripts"][run]
+            commands = scripts[run]
+            for cmd in commands:
+
+                if keys:
+                    for key in keys:
+                        pyautogui.keyDown(key)
+                    for key in reversed(keys):
+                        pyautogui.keyUp(key)
+
+                if cmd:
+                    time.sleep(1.5)
+                    pyautogui.press("enter")
+                    pyautogui.typewrite(cmd)
+                    pyautogui.press("enter")
         else:
             print(
                 f"[space-dev] Unable to find {run} on 'scripts'. Try running 'space-dev run --ls' for a list of avaible scripts.")
@@ -318,9 +329,6 @@ def run_script(space_name, run=None):
         print(
             f"[space-dev] Unable to find 'scripts' section on '.space-dev-config.json' file.")
         sys.exit()
-
-    for cmd in commands:
-        os.system(cmd)
 
     return True
 
