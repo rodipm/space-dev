@@ -309,6 +309,7 @@ def run_script(space_name, run=None):
         if run in scripts.keys():
             commands = scripts[run]
             for cmd in commands:
+                cmd, keys = parse_commands(cmd)
 
                 if keys:
                     for key in keys:
@@ -317,8 +318,6 @@ def run_script(space_name, run=None):
                         pyautogui.keyUp(key)
 
                 if cmd:
-                    time.sleep(1.5)
-                    pyautogui.press("enter")
                     pyautogui.typewrite(cmd)
                     pyautogui.press("enter")
         else:
